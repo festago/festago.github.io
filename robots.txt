@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://festago-official.github.io/sitemap-index.xml
-Host: https://festago-official.github.io
+Sitemap: https://festago.github.io/sitemap-index.xml
+Host: https://festago.github.io
