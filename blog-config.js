@@ -1,14 +1,10 @@
 module.exports = {
-  title: "hoodie",
-  description: "Hello :) I'm Hudi who developed gatsby-starter-hoodie theme.",
-  author: "Hudi",
-  siteUrl: "https://devhudi.github.io/gatsby-starter-hoodie/",
+  title: "Festago",
+  description: "2023 우아한테코코스 5기 페스타고 팀의 공식 블로그 입니다.",
+  author: "Festago",
+  siteUrl: "https://festago-official.github.io/",
   links: {
-    github: "https://github.com/devHudi",
-    linkedIn: "https://linkedin.com",
-    facebook: "https://www.facebook.com",
-    instagram: "https://www.instagram.com",
-    email: "mailto:devhudi@gmail.com",
+    github: "https://github.com/woowacourse-teams/2023-festa-go",
   },
   utterances: {
     repo: "devHudi/gatsby-starter-hoodie",
