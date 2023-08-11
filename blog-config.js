@@ -7,7 +7,7 @@ module.exports = {
     github: "https://github.com/woowacourse-teams/2023-festa-go",
   },
   utterances: {
-    repo: "devHudi/gatsby-starter-hoodie",
+    repo: "festago/festago.github.io",
     type: "pathname",
   },
 }
