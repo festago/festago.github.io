@@ -1,10 +1,12 @@
 ---
-title: "First Post"
-description: "Hello World"
-date: 2023-08-11
-update: 2023-08-11
+title: "페스타고의 공식 블로그가 오픈되었습니다!"
+description: "페스타고의 공식 블로그가 오픈되었습니다!"
+date: 2023-08-12
+update: 2023-08-12
 tags:
 - Festago
 ---
 
-# Hello World
+# 페스타고의 첫 게시글
+
+앞으로 많은 기대 부탁드립니다!
