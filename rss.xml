@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[RSS Feed of Festago]]></title><description><![CDATA[2023 우아한테코코스 5기 페스타고 팀의 공식 블로그 입니다.]]></description><link>https://festago.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Sun, 10 Sep 2023 08:16:15 GMT</lastBuildDate><item><title><![CDATA[선착순 티켓팅에 Redis 도입하기]]></title><description><![CDATA[안녕하세요. 페스타고의 애쉬 입니다. 🏹 ‘대학 축제 줄서기 서비스’ 페스타고를 개발하며, 티켓팅 상황에서 동시성 보장을 위해 Redis를 도입해보았습니다. 아래는 저희 팀의 요구사항과 문제 상황, 그리고 해당 문제 상황의 해결책으로 Redis…]]></description><link>https://festago.github.io/concurrency-redis/</link><guid isPermaLink="false">https://festago.github.io/concurrency-redis/</guid><pubDate>Sun, 10 Sep 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;안녕하세요.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[RSS Feed of Festago]]></title><description><![CDATA[2023 우아한테코코스 5기 페스타고 팀의 공식 블로그 입니다.]]></description><link>https://festago.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Sun, 10 Sep 2023 08:21:42 GMT</lastBuildDate><item><title><![CDATA[선착순 티켓팅에 Redis 도입하기]]></title><description><![CDATA[안녕하세요. 페스타고의 애쉬 입니다. 🏹 ‘대학 축제 줄서기 서비스’ 페스타고를 개발하며, 티켓팅 상황에서 동시성 보장을 위해 Redis를 도입해보았습니다. 아래는 저희 팀의 요구사항과 문제 상황, 그리고 해당 문제 상황의 해결책으로 Redis…]]></description><link>https://festago.github.io/concurrency-redis/</link><guid isPermaLink="false">https://festago.github.io/concurrency-redis/</guid><pubDate>Sun, 10 Sep 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;안녕하세요.&lt;/p&gt;
 &lt;p&gt;페스타고의 애쉬 입니다. 🏹&lt;/p&gt;
 &lt;p&gt;‘대학 축제 줄서기 서비스’ 페스타고를 개발하며, 티켓팅 상황에서 동시성 보장을 위해 Redis를 도입해보았습니다.&lt;/p&gt;
 &lt;p&gt;아래는 저희 팀의 요구사항과 문제 상황, 그리고 해당 문제 상황의 해결책으로 Redis를 도입한 이유입니다.&lt;/p&gt;
@@ -6,65 +6,53 @@
 &lt;p&gt;티켓은 지정된 수량만큼만 발급되어야합니다.&lt;/p&gt;
 &lt;h2&gt;2. 문제 상황&lt;/h2&gt;
 &lt;p&gt;동시에 여러 사용자가 예매할 때, 지정된 수량보다 더 많은 수량의 티켓이 예매됩니다.&lt;/p&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/d684b93fc5d21695c9ac0da8753c0cf7/bbbf7/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 85.29411764705883%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAARCAIAAABSJhvpAAAACXBIWXMAAAsTAAALEwEAmpwYAAACaUlEQVR42m1TS2/TQBDuBYl/wAUO/AtuPcGtV/5CJS4IgUAVByQOIHHgUnEAJMoRIaCiKm2J05ZCyatp3jSkTe36lTgvp37sehPbu4ztNGpDPtmr2W/m087uzMywEL7vNxqNTgjHIcDwJqubgctGCFzdbhdWz/PYOcyMrWKpFIvF0pnMqWkpmMVVGldoAzPYplJJjuPS6fRwOJwippTCqmgtMhj4lDpDVydMw8wNaEYI0TRtHHZB7IdMpU9vrQ/elszyXiKXz99N+fNJ5oUuhJAoitPFUURcJNeX2T2uWd1PCkrz5oY7u8EcLxJjWZaniwFOAFwQWhYmESPZrGaM0gKfIKnTxUD1dR0MVVUgwyCC0sf7/p0Mq9TqxUxipSDOcf5KeLZHJ9L2PL3XC8SKjDEGY+jT2zts9jutSZp69Of5au7aMntRIJNiPygydTCqHvGvd2r5Y/VE4JlLNo6tV5lWFIQdkuVbyCG2bV1Iu4lYvlr/W9hb+lm9/HBr/v0uXy1/W1u78Wz96pPto44d9ImNICkwDMOAUo9bZQYexPU86rk97C58LWXFIH+X4NWD9mJCpWEZ4S6KPBKD7brutCaRJSe8M6CsodixgSzzRBBa+unS7uGh2jH7vVH8/2JRVtCZeO5N9soC9/Ldh4Ps70WufOl+/NHngt43BL7eUOUpJ0uShM/En8rtp5uCjWBL+bbx4Eux2HJyGtkqiz+qjUOD9QcTaSsK9EPEWC7rjEwGd1GEOtTlV5NmemxbYx/5YOwuiGF04EkipqLTfHdUU9O0uPjmWVj4T4wkoN1uj19y4AffGBONGeEfw1ytr4dERv0AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Untitled&apos; title=&apos;&apos; src=&apos;/static/d684b93fc5d21695c9ac0da8753c0cf7/ca1dc/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png&apos; srcset=&apos;/static/d684b93fc5d21695c9ac0da8753c0cf7/e7570/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;    &apos; title=&apos;&apos; src=&apos;/static/d684b93fc5d21695c9ac0da8753c0cf7/ca1dc/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png&apos; srcset=&apos;/static/d684b93fc5d21695c9ac0da8753c0cf7/e7570/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 170w,
 /static/d684b93fc5d21695c9ac0da8753c0cf7/f46e7/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 340w,
 /static/d684b93fc5d21695c9ac0da8753c0cf7/ca1dc/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 680w,
 /static/d684b93fc5d21695c9ac0da8753c0cf7/02d09/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 1020w,
 /static/d684b93fc5d21695c9ac0da8753c0cf7/bbbf7/%EB%AC%B8%EC%A0%9C%EC%83%81%ED%99%A9.png 1280w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
-    &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Untitled&lt;/figcaption&gt;
-  &lt;/figure&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;
 &lt;h2&gt;3. 현재 해결책&lt;/h2&gt;
 &lt;p&gt;티켓 수량의 정합성을 보장하기 위하여, &lt;strong&gt;비관적 락&lt;/strong&gt;을 적용했습니다.&lt;/p&gt;
 &lt;p&gt;하지만 비관적 락은 락을 얻기 위한 대기시간이 발생하기 때문에 성능적으로 좋지 않습니다.&lt;/p&gt;
 &lt;h3&gt;3-1. 현재의 성능 개선책&lt;/h3&gt;
 &lt;h4&gt;TicketAmount 테이블 분리&lt;/h4&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/78e98164ed9d5e19c83cd23c30ad79cb/bbbf7/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 68.82352941176471%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAYAAAAvxDzwAAAACXBIWXMAAAsTAAALEwEAmpwYAAABfklEQVR42p2TWavCQAyF5///rSJYaFFcccEnd6t1b13aI19gxIfbh9vA0Gkmc3JyknGqYY/HQ6fTSev1WpvNRvv9XufzWe/3W+6/YEVR6HK56H6/q9vtqtFoqN1u63a76Xq9yr1eL0Mn6Pl8WiCHZVn+CQiLNE3FPWJ+F6wdQIfDwbKEYahWq2WgWZZVAlLiZDLRfD7X8Xg0P4BgOdhQBrpwiJNL+KsAiRmPx0ag3+8bIcxKhj4bn8WLzqVfnzf+SZbn+Vci9mDgd4vFQnEcazQafUEIQFeflcUZJe52OwMlBrDlcml6EkOlbrvdmm6dTse+jAGXEdiXSCALANh7iQBNkuSrOYncarUyLWAZBIF6vZ6JXlUyBvvZbKbpdKrBYGANQlPuOaiSiUUWslOCb0qVhsQCTCVo6YfdugwAThZ7Dqq6jNFIGA2HQ2PHdEDMAGFENj/p7Ktm0BsAzG0URWo2myYXzYKxq/OW0dePCXvKpXm1AQHwzxW2APOlDx++dzpK6EtbuQAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Untitled&apos; title=&apos;&apos; src=&apos;/static/78e98164ed9d5e19c83cd23c30ad79cb/ca1dc/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png&apos; srcset=&apos;/static/78e98164ed9d5e19c83cd23c30ad79cb/e7570/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;ticket     &apos; title=&apos;&apos; src=&apos;/static/78e98164ed9d5e19c83cd23c30ad79cb/ca1dc/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png&apos; srcset=&apos;/static/78e98164ed9d5e19c83cd23c30ad79cb/e7570/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 170w,
 /static/78e98164ed9d5e19c83cd23c30ad79cb/f46e7/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 340w,
 /static/78e98164ed9d5e19c83cd23c30ad79cb/ca1dc/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 680w,
 /static/78e98164ed9d5e19c83cd23c30ad79cb/02d09/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 1020w,
 /static/78e98164ed9d5e19c83cd23c30ad79cb/bbbf7/ticket%EB%8F%84%EB%A9%94%EC%9D%B8%EA%B5%AC%EC%A1%B0.png 1280w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
-    &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Untitled&lt;/figcaption&gt;
-  &lt;/figure&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;Ticket 테이블에서 수량 정보를 TicketAmount 테이블로 분리한 후, 해당 테이블에만 비관적 락을 적용함으로써 &lt;strong&gt;락 범위를 최소화&lt;/strong&gt;했습니다.&lt;/p&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/da1c613727496495ca18fac06fa65d80/bbbf7/lock%EB%B2%94%EC%9C%84.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 57.05882352941176%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAIAAADwazoUAAAACXBIWXMAAAsTAAALEwEAmpwYAAACT0lEQVR42kWR32vTUBTH85/Imqbtktyb3zfprzRpx+oy9qBsuO5hWnEDmb6Ij/4L4vbStZn1QVAQXxSEwagwt7XbhIEoPohdnwSZKNvSJF1xbb3pUA8fDpdz+B7OPV/i46cPO/XNxm693mhs1Grvtra2trd39/a/NpvNw0PMYav1j2ar5Xc6g79BzExm03xUl8WUwJsSyEhcghc0wKgsg2gaMTRPkXyYFMJB5kMje40GlvV6vUB8zbISaiKlm+m0bhpGRtcTcU0UOB5CyDKAoVk6ANBBIDpW23iDZf1+PxBPX84jUYynTDWeVuIJNaVryaSoIAkhyHMsxwdADgrCKOQQw7x8vtztOoPhAGJ+5mpela2MYRmmZWQmTcPK6DlVyQagnKZeMBbXspo6rkgHe/v/1/b8jtt2fbftt532yYl7euo5TsdzzzzvzHNxD7ec42Nc9x3H972e2x50/MH5OR5AvH71wq48KpdLlYptV8q2bVerT0ql1VVcKpXstTXM8spKuVzGpcfV6o+jo8GXz936Zu/7N8LK5wAHRKTykoyQICkiFGQasjGGidJsjKZD4TBJUWSYCpHhSyS587Y2cJ3fv372PZeYnpoaSyYncmN5w8B5wsyOpxO6IqdlKc4DFbAahBoEGgc1AFQO7K6vB3++uPYVMyNHIgovK5woQYhECWGjRmkOOxSl2GiUjUQYKgJisRhFyaGRZ08fng2vjd0iHty/d7swe6dYxCwVb9y9WVy6Pr84N3urMLswV1icKywMuXgsFgoH77eHysCsPx5iQ1uHLBgKAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Untitled&apos; title=&apos;&apos; src=&apos;/static/da1c613727496495ca18fac06fa65d80/ca1dc/lock%EB%B2%94%EC%9C%84.png&apos; srcset=&apos;/static/da1c613727496495ca18fac06fa65d80/e7570/lock%EB%B2%94%EC%9C%84.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;lock  &apos; title=&apos;&apos; src=&apos;/static/da1c613727496495ca18fac06fa65d80/ca1dc/lock%EB%B2%94%EC%9C%84.png&apos; srcset=&apos;/static/da1c613727496495ca18fac06fa65d80/e7570/lock%EB%B2%94%EC%9C%84.png 170w,
 /static/da1c613727496495ca18fac06fa65d80/f46e7/lock%EB%B2%94%EC%9C%84.png 340w,
 /static/da1c613727496495ca18fac06fa65d80/ca1dc/lock%EB%B2%94%EC%9C%84.png 680w,
 /static/da1c613727496495ca18fac06fa65d80/02d09/lock%EB%B2%94%EC%9C%84.png 1020w,
 /static/da1c613727496495ca18fac06fa65d80/bbbf7/lock%EB%B2%94%EC%9C%84.png 1280w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
-    &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Untitled&lt;/figcaption&gt;
-  &lt;/figure&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;
 &lt;h4&gt;N+1 쿼리 제거&lt;/h4&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/dc992/n%2B1.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 29.411764705882355%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAABYlAAAWJQFJUiTwAAAA/0lEQVR42pWQXW6DMBAGOU2jBox/sXEIAQIkoal6/9tMN02lPrZ9GK3X1jdab5HSjpx3WFdSKoWq9pSVnKvqm/JfFGFyzBfDdjX0S8OyGIbbwHCfCVPEHC22d7iT/xOFnRqGi+d9E+lNi6zlvF0Yt5l2yeTlQFozYY74c/iVwo5BJrTcr5pRgt16kOlWlo83TjeRnjvyesRPCTdIaPzBjf7J8KyPu+LxrdgH2lZjQ8A4S4iGmNxXdV7Jfit5K9FOUdua2tUoQTstGIy3kjMorSh8aEi5o2mCSBLeOfqomDvDfDCMrew2VXT5BR9eRVCLQKRWSR8JIZHajih5Ve75BHQDwzS8EKi6AAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Untitled&apos; title=&apos;&apos; src=&apos;/static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/ca1dc/n%2B1.png&apos; srcset=&apos;/static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/e7570/n%2B1.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;n 1&apos; title=&apos;&apos; src=&apos;/static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/ca1dc/n%2B1.png&apos; srcset=&apos;/static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/e7570/n%2B1.png 170w,
 /static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/f46e7/n%2B1.png 340w,
 /static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/ca1dc/n%2B1.png 680w,
 /static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/02d09/n%2B1.png 1020w,
 /static/aa2c9cdd05f32ba9e376cb6fab0d3eaa/dc992/n%2B1.png 1178w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
     &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Untitled&lt;/figcaption&gt;
-  &lt;/figure&gt;
 Fetch Join을 활용해 N+1 쿼리를 제거했습니다.&lt;/p&gt;
 &lt;p&gt;⇒ 결과적으로 &lt;strong&gt;10% 정도의 성능 개선&lt;/strong&gt;을 이루어낼 수 있었습니다.&lt;/p&gt;
 &lt;h2&gt;4. 앞으로의 성능 개선책&lt;/h2&gt;
@@ -75,20 +63,17 @@ Fetch Join을 활용해 N+1 쿼리를 제거했습니다.&lt;/p&gt;
 &lt;p&gt;따라서, &lt;strong&gt;DB의 티켓 수량을 변경하지 않는 해결책&lt;/strong&gt;을 찾고자 했습니다.&lt;/p&gt;
 &lt;h3&gt;4-1. AtomicInteger의 활용&lt;/h3&gt;
 &lt;p&gt;첫번째 해결책으로 AtomicInteger를 활용해 &lt;strong&gt;메모리에서 티켓의 수량을 변경하고 관리&lt;/strong&gt;하고자 했습니다.&lt;/p&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/47a0c66aa6ebe21a927c4353a6285665/1d574/atomicInteger.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 42.94117647058824%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAJCAIAAAC9o5sfAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB9UlEQVR42jWRy28SURjF509wJdZEEjvAPC4tc5kHj2HowFCif4AubO3KUCkG3JgZusDYunDZvYlaGFi61rWPnVFiY7GmCyvGRYUqILYduNc70/jll3O+zUnu+S7Vaj5utex6vW7Xt+uNRsO2m3az2Wy5tv3UfkZ4csbPXh9jfDr+44xHZJkgTHEcE4lKEQhlKSJAgQOADgVpOjAbZC9ykZnQ3ExonuALgDftzneEX3f7bw8OPxyddseIiifUTC6f1g3dWNSzWTWlxhJJRYZg4eqllU3/Us2/8sC/XPNdrz5/f/Cyhx7tDbf2R1ud/pehQ4UZVpaTohgTJVmKJSCEPA94nmc5niPKEucZlmOC9LudXfJajByEp8RGDqLMe3fXq5ZlWt6YlnmG5er/IVvVMve7P7wwQq7hkYMpXY8b+XzWyF7J60Yut5DJqloqqWqqqsZjkiJFFUmUJVERYXt3j2Sc6XTi5YckLCqJlG6k0rqmZ7S0piiyIEpwHrDq4vmbD303ar7ljQtL989dWyedX/RRdedo49OvzY+HnwduZ4Z0hlCBkiwqcUEQeBBmeTbAhQNzURoIRGeBcJkFr9qd3xgPjp3ByWR44vSOEVUs3CpXKuUygUzlTqlULBbXPEq3Vz0KRNdWC1+/dd1/niBnisnR/k7wPw7ECod7zhyiAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Alt text&apos; title=&apos;&apos; src=&apos;/static/47a0c66aa6ebe21a927c4353a6285665/ca1dc/atomicInteger.png&apos; srcset=&apos;/static/47a0c66aa6ebe21a927c4353a6285665/e7570/atomicInteger.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;atomicInteger&apos; title=&apos;&apos; src=&apos;/static/47a0c66aa6ebe21a927c4353a6285665/ca1dc/atomicInteger.png&apos; srcset=&apos;/static/47a0c66aa6ebe21a927c4353a6285665/e7570/atomicInteger.png 170w,
 /static/47a0c66aa6ebe21a927c4353a6285665/f46e7/atomicInteger.png 340w,
 /static/47a0c66aa6ebe21a927c4353a6285665/ca1dc/atomicInteger.png 680w,
 /static/47a0c66aa6ebe21a927c4353a6285665/02d09/atomicInteger.png 1020w,
 /static/47a0c66aa6ebe21a927c4353a6285665/9d567/atomicInteger.png 1360w,
 /static/47a0c66aa6ebe21a927c4353a6285665/1d574/atomicInteger.png 1510w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
-    &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Alt text&lt;/figcaption&gt;
-  &lt;/figure&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;이 방법은 DB의 데이터를 갱신하지 않기 때문에, 동시 예매 상황에서 발생하는 문제가 발생하지 않습니다.&lt;/p&gt;
 &lt;p&gt;지금의 단일 서버에서는 문제가 발생하지 않지만, 무중단 배포를 위한 다중 서버 환경에서는 메모리 공유 문제가 발생합니다.&lt;/p&gt;
 &lt;p&gt;티켓의 수량은 단순히 조회하는 값이 아닌 매 요청마다 변경되는 값이기 때문에 동기화에서 문제 발생이 우려됩니다.&lt;/p&gt;
@@ -126,20 +111,17 @@ Fetch Join을 활용해 N+1 쿼리를 제거했습니다.&lt;/p&gt;
 &lt;h2&gt;5. 추가적인 활용법&lt;/h2&gt;
 &lt;p&gt;저희 서비스의 요구사항으로, 한 사용자는 특정 무대에 대해 한 장의 티켓만 발급할 수 있습니다.&lt;/p&gt;
 &lt;p&gt;하지만 한 사용자가 동시에 여러 요청을 보내면, 티켓이 여러 장 발급되는 문제(일명 &lt;strong&gt;“따닥” 문제&lt;/strong&gt;)가 발생했습니다.&lt;/p&gt;
-&lt;p&gt;&lt;figure class=&apos;gatsby-resp-image-figure&apos; style=&apos;margin-bottom: 16px;&apos;&gt;
-    &lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; &apos;&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
       &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/71f9a9f0553cb19960e49fc7b02f9fc6/1d574/%EB%94%B0%EB%8B%A5.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
     &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 75.88235294117648%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAPCAIAAABr+ngCAAAACXBIWXMAAAsTAAALEwEAmpwYAAACPklEQVR42m1TS2/TQBDO70VICAGCA2fuiANcOYPUC7SiTUiT2DhOyYOoSUmT+BUbJ3H8Xq/xY3cZ21HSVszB3tn1N/N9s59rjLEwDHu9nud57E5sY3aisXW8Tyktnpqm9ft9jHG1WavAPM/7vl98VO4SytSI9mymoP0OLdGKooiiGMf7krVq1zRN13X9MmCBEMqSeIUIZfeCEGIYxiHdg5fLJcdxzWYTKHQ6HaHbbdQbrWsJzkAOCsMgCKBiFEXA/ECkhjKKKVvKiue5kK/XazjO85wSctGffjs/r9frrVarUYYgCNDmCOY25MRk36/G3R8cxjEgJUmyHcex7V+rHSpnU7WFRZqmsqqFOcN5Cc5JUUTXDV3Xp9OpLMv6StOlBfZsyQrd7dq3NqPhYDgcQkVR4L+2xU8m61rkqBkaTiYTuIbr8bgp/vxw2X972n5z1uUt3FAsL8koyZMkAc2KqpLiOugRDDOEs/JOyO8geTr/++wmfMzJTwbbR7wioay6RZg2EDxqhhxewKrVbtugczSSb2fYUCNdXltOEnqRZfquA7Jh7KD5Hrh6wZBgzmmeAz8vTgbb4MaL31/03n3+8vEUxt3hOa7DcfP5XFXVh+CCdpYxYC7NZqvN82n4euK9aN++vDJeCZIWpaXtaJZl/+lcgNO0cDAKM4SAbY4RRgi7Tuy7uqaBIhC42+0Wi8VDMPA5OBbyjNCMsjMpkLWVbvyBCUMAHkwChql8egSD3Ssb3A0lYg+8DQ3g/zt0/gdSoDu8dAJAiAAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
-  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;Alt text&apos; title=&apos;&apos; src=&apos;/static/71f9a9f0553cb19960e49fc7b02f9fc6/ca1dc/%EB%94%B0%EB%8B%A5.png&apos; srcset=&apos;/static/71f9a9f0553cb19960e49fc7b02f9fc6/e7570/%EB%94%B0%EB%8B%A5.png 170w,
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;  &apos; title=&apos;&apos; src=&apos;/static/71f9a9f0553cb19960e49fc7b02f9fc6/ca1dc/%EB%94%B0%EB%8B%A5.png&apos; srcset=&apos;/static/71f9a9f0553cb19960e49fc7b02f9fc6/e7570/%EB%94%B0%EB%8B%A5.png 170w,
 /static/71f9a9f0553cb19960e49fc7b02f9fc6/f46e7/%EB%94%B0%EB%8B%A5.png 340w,
 /static/71f9a9f0553cb19960e49fc7b02f9fc6/ca1dc/%EB%94%B0%EB%8B%A5.png 680w,
 /static/71f9a9f0553cb19960e49fc7b02f9fc6/02d09/%EB%94%B0%EB%8B%A5.png 1020w,
 /static/71f9a9f0553cb19960e49fc7b02f9fc6/9d567/%EB%94%B0%EB%8B%A5.png 1360w,
 /static/71f9a9f0553cb19960e49fc7b02f9fc6/1d574/%EB%94%B0%EB%8B%A5.png 1510w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
   &lt;/a&gt;
-    &lt;/span&gt;
-    &lt;figcaption class=&apos;gatsby-resp-image-figcaption&apos;&gt;Alt text&lt;/figcaption&gt;
-  &lt;/figure&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;이는 DB의 MemberTicket 테이블에 &lt;strong&gt;(memberId, stageId) Unique 제약조건&lt;/strong&gt;을 걸어줌으로써 해결할 수 있습니다.&lt;/p&gt;
 &lt;p&gt;하지만 Unique 제약 조건은 Change Buffer 기능을 비활성화 시킴으로 데이터 삽입 연산의 성능이 저하되는 문제가 발생합니다.&lt;/p&gt;
 &lt;p&gt;또한, 한 사용자당 발급 가능 횟수가 1회에서 2회로 변경될 경우 해당 방법으로 해결할 수 없습니다.&lt;/p&gt;
