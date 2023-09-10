@@ -25,7 +25,7 @@ tags:
 
 동시에 여러 사용자가 예매할 때, 지정된 수량보다 더 많은 수량의 티켓이 예매됩니다.
 
-![Untitled](images/문제상황.png)
+![](images/문제상황.png)
 
 ## 3. 현재 해결책
 
@@ -36,15 +36,15 @@ tags:
 ### 3-1. 현재의 성능 개선책
 
 #### TicketAmount 테이블 분리
-![Untitled](images/ticket도메인구조.png)
+![](images/ticket도메인구조.png)
 
 Ticket 테이블에서 수량 정보를 TicketAmount 테이블로 분리한 후, 해당 테이블에만 비관적 락을 적용함으로써 **락 범위를 최소화**했습니다.
 
-![Untitled](images/lock범위.png)
+![](images/lock범위.png)
 
 
 #### N+1 쿼리 제거
-![Untitled](images/n+1.png)
+![](images/n+1.png)
 Fetch Join을 활용해 N+1 쿼리를 제거했습니다.
 
 
@@ -68,7 +68,7 @@ Fetch Join을 활용해 N+1 쿼리를 제거했습니다.
 
 첫번째 해결책으로 AtomicInteger를 활용해 **메모리에서 티켓의 수량을 변경하고 관리**하고자 했습니다.
 
-![Alt text](images/atomicInteger.png)
+![](images/atomicInteger.png)
 
 이 방법은 DB의 데이터를 갱신하지 않기 때문에, 동시 예매 상황에서 발생하는 문제가 발생하지 않습니다.
 
@@ -100,7 +100,7 @@ Redis는 싱글 스레드이며 multiplexing 기술을 활용하여 단일 프�
 
 하지만 한 사용자가 동시에 여러 요청을 보내면, 티켓이 여러 장 발급되는 문제(일명 **“따닥” 문제**)가 발생했습니다.
 
-![Alt text](images/따닥.png)
+![](images/따닥.png)
 
 이는 DB의 MemberTicket 테이블에 **(memberId, stageId) Unique 제약조건**을 걸어줌으로써 해결할 수 있습니다.
 
