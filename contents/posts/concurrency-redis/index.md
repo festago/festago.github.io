@@ -7,9 +7,7 @@ tags:
 - Redis
 ---
 
-안녕하세요.
-
-페스타고의 애쉬 입니다. 🏹
+안녕하세요. 페스타고의 애쉬 입니다. 🏹
 
 ‘대학 축제 줄서기 서비스’ 페스타고를 개발하며, 티켓팅 상황에서 동시성 보장을 위해 Redis를 도입해보았습니다.
 
@@ -27,15 +25,15 @@ tags:
 
 ![](images/문제상황.png)
 
-## 3. 현재 해결책
+## 3. 지금까지의 해결책
 
 티켓 수량의 정합성을 보장하기 위하여, **비관적 락**을 적용했습니다.
 
 하지만 비관적 락은 락을 얻기 위한 대기시간이 발생하기 때문에 성능적으로 좋지 않습니다.
 
-### 3-1. 현재의 성능 개선책
+### 3-1. 성능 개선책
 
-#### TicketAmount 테이블 분리
+#### ✅ TicketAmount 테이블 분리
 ![](images/ticket도메인구조.png)
 
 Ticket 테이블에서 수량 정보를 TicketAmount 테이블로 분리한 후, 해당 테이블에만 비관적 락을 적용함으로써 **락 범위를 최소화**했습니다.
@@ -43,7 +41,7 @@ Ticket 테이블에서 수량 정보를 TicketAmount 테이블로 분리한 후,
 ![](images/lock범위.png)
 
 
-#### N+1 쿼리 제거
+#### ✅ N+1 쿼리 제거
 ![](images/n+1.png)
 Fetch Join을 활용해 N+1 쿼리를 제거했습니다.
 
@@ -93,8 +91,56 @@ Redis는 싱글 스레드이며 multiplexing 기술을 활용하여 단일 프�
 | 12177 | 7123 |
 | 11969 | 7414 |
 
+## 5. Redis 활용법
 
-## 5. 추가적인 활용법
+구체적인 Redis 활용법을 알아보도록 하겠습니다.
+
+![](images/티켓등록.png)
+
+
+### (1) 티켓 등록시 Redis에 값 넣어주기
+
+티켓을 등록하면, (`ticketAmount_ticketId`, `ticketAmount`) 데이터를 Redis에 등록합니다.
+(추가 수량 발급시, ticketAmount를 추가 수량만큼 더해줍니다.)
+
+
+```java
+public void updateTicketAmount(TicketAmountChangeEvent ticketAmountChangeEvent) {
+    Long ticketId = ticketAmountChangeEvent.ticketId();
+    Integer ticketAmount = ticketAmountChangeEvent.ticketAmount();
+    redisTemplate.opsForValue().set("ticketAmount_" + ticketId.toString(), ticketAmount.toString());
+}
+```
+
+### (2) 티켓팅시 Redis에서 수량 관리하기
+
+![](images/티켓팅.png)
+
+
+Redis의 DECR 연산으로티켓팅에서 해당 티켓의 잔여 수량을 조회함과 동시에, 잔여 수량을 1 감소합니다.
+
+이 때, 잔여 수량 "조회"와 "1 감소"는 원자적인 단위로 이루어져 동시성 문제가 발생하지 않습니다.
+
+
+```java
+public Optional<Integer> getSequence(Ticket ticket) {
+    Integer totalAmount = ticket.getTicketAmount().getTotalAmount();
+    Long quantity = getQuantity(ticket.getId());
+    if (quantity == null || quantity < 0) {
+        return Optional.empty();
+    }
+    return Optional.of(totalAmount - quantity.intValue());
+}
+```
+
+잔여 수량이 0 이상이면, 티켓팅에 성공한 것으로 총 수량에서 잔여 수량을 빼 티켓 순번을 결정합니다.
+
+잔여 수량이 0보다 적으면 이는 품절된 것으로, 티켓팅에 실패합니다.
+
+
+
+
+## 6. 추가적인 활용법
 
 저희 서비스의 요구사항으로, 한 사용자는 특정 무대에 대해 한 장의 티켓만 발급할 수 있습니다.
 
@@ -111,7 +157,7 @@ Redis는 싱글 스레드이며 multiplexing 기술을 활용하여 단일 프�
 이러한 따닥 문제를 해결하기 위한 해결책으로도 Redis를 활용하였습니다.
 
 
-### 5-1. 따닥 문제 해결하기
+### 6-1. 따닥 문제 해결하기
 
 티켓 예매 시도시, 해당 memberId와 stageId의 복합키 `trialCount_stageId_memberId` 의 값을 incrementAndGet 합니다.
 
@@ -141,6 +187,33 @@ end
 
 return remainAmount
 ```
+
+아래는 lua 스크립트를 활용한 서비스 코드입니다.
+
+```java
+public Optional<Integer> getSequence(Ticket ticket, Member member) {
+    Long remainAmount = redisTemplate.execute(
+        redisScript,
+        List.of(makeMemberKey(ticket, member), makeTicketAmountKey(ticket)),
+        MAX_MEMBER_TRIAL_COUNT);
+    if (remainAmount == null || remainAmount < 0) {
+        return Optional.empty();
+    }
+    Integer totalAmount = ticket.getTicketAmount().getTotalAmount();
+    return Optional.of(totalAmount - remainAmount.intValue());
+}
+
+private String makeMemberKey(Ticket ticket, Member member) {
+    Long stageId = ticket.getStage().getId();
+    Long memberId = member.getId();
+    return String.format("trialCount_%d_%d", stageId, memberId);
+}
+
+private String makeTicketAmountKey(Ticket ticket) {
+    return String.format("ticketAmount_%d", ticket.getId());
+}
+```
+
 
 ---
 
