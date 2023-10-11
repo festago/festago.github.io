@@ -1,4 +1,346 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[RSS Feed of Festago]]></title><description><![CDATA[2023 우아한테코코스 5기 페스타고 팀의 공식 블로그 입니다.]]></description><link>https://festago.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Wed, 20 Sep 2023 01:01:30 GMT</lastBuildDate><item><title><![CDATA[LiveData로 이벤트 처리하기: SingleLiveData]]></title><description><![CDATA[…]]></description><link>https://festago.github.io/event-singlelivedata/</link><guid isPermaLink="false">https://festago.github.io/event-singlelivedata/</guid><pubDate>Tue, 19 Sep 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;안녕하세요. 페스타고의 해시입니다.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[RSS Feed of Festago]]></title><description><![CDATA[2023 우아한테코코스 5기 페스타고 팀의 공식 블로그 입니다.]]></description><link>https://festago.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Wed, 11 Oct 2023 02:12:33 GMT</lastBuildDate><item><title><![CDATA[Refactoring LiveData to Flow]]></title><description><![CDATA[안녕하세요. 페스타고의 베르입니다. 페스타고 앱을 개발하면서 LiveData 를 StateFlow 와 SharedFlow 로 리팩터링 했습니다. 리팩터링한 이유, 과정 그리고 어려웠던 점까지 공유하려고 합니다. Festago…]]></description><link>https://festago.github.io/livedata-to-flow/</link><guid isPermaLink="false">https://festago.github.io/livedata-to-flow/</guid><pubDate>Wed, 11 Oct 2023 00:00:00 GMT</pubDate><content:encoded>&lt;hr&gt;
+&lt;p&gt;안녕하세요. 페스타고의 베르입니다.&lt;/p&gt;
+&lt;p&gt;페스타고 앱을 개발하면서 LiveData 를 StateFlow 와 SharedFlow 로 리팩터링 했습니다. 리팩터링한 이유, 과정 그리고 어려웠던 점까지 공유하려고 합니다.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Festago 를 개발하면서 ViewModel 의 UiState 및 Event 를 감지하기 위해 LiveData 를 사용했다.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
+      &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/f97d7/image.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
+    &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 35.29411764705882%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAHCAYAAAAIy204AAAACXBIWXMAAAsTAAALEwEAmpwYAAABJElEQVR42q2QSW7DMAxFff+TdddNNkUQy9ZkTZ4aJbEdxL+kHBQ9QAUQFD6fPklVz+cGHwNiSkhDj851SH2PQJoPhz6MIzGRtIjYJ/TE+eApD/BUj+nQH8uC6rltkEri0ghoayC1gjIa1rmSG9mSpqmRI45qxNjOFq6RDZwn3SjiO+z7jmrb1vJQEcCPeELTdUULNAUbamtLM8NG1Fy0orDM8HZSS5o+gU+1rCviOGCg8XtaldeY57msxavzOjxtetcCfcM0TcCOMhHH63XkYriR4UoGebnh+sglvu/XkvPCdwrWl/zWbn9qxL3Z+/o4DJ0xOH9+4NR+oQkKtWtx1jXOtoag+6VrfkN4WTRmhCfO1LhYUWqmd4fhNWeo0WPKM/7j/ACuVhIVlixyDgAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;image&apos; title=&apos;&apos; src=&apos;/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/ca1dc/image.png&apos; srcset=&apos;/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/e7570/image.png 170w,
+/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/f46e7/image.png 340w,
+/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/ca1dc/image.png 680w,
+/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/02d09/image.png 1020w,
+/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/9d567/image.png 1360w,
+/static/62ba8d1cfdcd4c1ebf6dedc09505ce1e/f97d7/image.png 2000w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;이상적으로 ViewModel 은 Android 를 알아선 안된다. 테스트 가능성, 메모리 누수 안전성, 모듈성을 향상시킨다.&lt;/p&gt;
+&lt;p&gt;참고: AndroidDevelopers 블로그&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://medium.com/androiddevelopers/viewmodels-and-livedata-patterns-antipatterns-21efaef74a54&quot;&gt;https://medium.com/androiddevelopers/viewmodels-and-livedata-patterns-antipatterns-21efaef74a54&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;이를 이유로 안드로이드 의존성을 갖는 LiveData 를 사용하던 기존 코드들을 Kotlin 의존성을 갖는 Flow 로 Migration 해보기로 했다.&lt;/p&gt;
+&lt;p&gt;StateFlow 와 SharedFlow 에 대한 이론적인 글은 개인 블로그 글을 참고해주세요.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://seonghoonc.tistory.com/30&quot;&gt;https://seonghoonc.tistory.com/30&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;화면 소개&lt;/h2&gt;
+&lt;p&gt;Migration 할 학교 인증(StudentVerification)을 하는 화면이다.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 383px; margin-bottom: 16px;&apos;&gt;
+      &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/af7906b3ca7d8be2e2dfde7b38b71096/c778f/image-1.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
+    &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 202.94117647058823%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAApCAYAAAA1bQl+AAAACXBIWXMAAAsTAAALEwEAmpwYAAAE5UlEQVR42qVWW2xURRje+AKlxvjgDU2UF6OJtwdfeDbGByVpMWiwDaEm1EAjUQPRBOEBNUWNIogojYquVgqRi+0uS/dCC15YmsrSGoqgsXS3l+1ut7vd3XbPbeZ8zsw5Z3fP6W5bcdOv/1y/+f+Z7585Ll3TQRks64Szn6gGNHX+PF52WQUnoZik2MHbdKIDuoFKTricDXxlVSmbiDKwuixRTM9QJNJUjC2PQHjoXMVYnSI3SxFLUkT+ofBdInD3UhzwUXzUpaP1pI6D3RSZHAWo4bktZCtE7kVnn4b6DwmebaVYvYNDx1O7gTXvA42fAq99A7zdAXzi1TE2RYUDVC0L2fKQh8kJ93k0uNYBL+6lOHFRwq6jKj74ScOhoIYjv6g43EPwY5jgveM6/owZhKQSoWYShgY11G7Q0fIlwdVYAd/2SvjCryAwoMB9TsWJsIYgG7PrGBC+RmyEtpA1M+SrUYL7W4xQmw9paPpMw+Y2wkKl2OYmePc4xZ5TFDs6dHh+Zx4SxymX64tvcDpL8cR2gppGYGUz8Pg24OndOhr2U+zsoGgL6PAxosFhKsZahLqT0GrUVIq32g2v2vwE/gjB9VGKmTwVfVwBlox0Oj8B5smG10HtEwWo0WdlSflBLChsEb45UTUzpFJq6lXStCLhzWJRQv0mSEt7yDa8aK1yFRDWL6CQYrlIqLFGaU6CKqtQJEVYVdZEWS7IFaGxfg6iEqOsaAaHpLKQGftsbg6TEwlkpmcQH08gOhzDXL7ATpadLymB1/li0RujGIuOY3RkDMn4FJszicKsBO6ciwgPZeQyOUGcz84ilZwWA2zhmZALilg4m8mLcVk2LzeTZ+Nlw0NOKDNCvjJvUM0QFFbmk5WCIqwos20Q+iSEHRgDMcoClDAHqHljE3tozjbKw2Xggt5z7C+8vPcSXj04gC0HLgs0749g6+eDGE8WKmdKpVPlyZKYlnBvQzce2OjDk1uDeKwlgEe3BPBQsx+uZ07C3z+5uLBLstLFoVy4ksJX3SNwB6NwB6L4jtnD3VF4wnEoMqlOWPUV5Kld5cffoSWFbHvEFMpyvDJ4FLZn1HmVVUO1N7uUeg6tESv9KoA4rA1W6nEdcis0yDbW0uB/gWRqmQmbiqxIJVPIprNIpzJiANedvkjo5eAJUswUzp5KpFhKZURaSSyNlkJIVeOQxGUsOwhLIWtLDpnfTFTTBMQtJW4b6wIou9sWA/eKv3aJVAGR6ykMDafx92jW0CFdQApVJcOzhv1NJOdwfjCO8FACQzcyYpvKvhyqC7Ya+LNKrXeZOF49LJBSS/mVnlHzi6H/Whqnfh2H92KcJfpEGZx1e1/nbxM4G0lClvn9xgi5Z6mMjIdfCeGW5zqxot6D5XUeYWuf92LFWg9uZbZ2rVG+bd1pYfmYGmssq//8x5Tw1MX/jU7O4ZHNPbhvQwCrmoJY2RjA6jfO482vL+P1tgg27evHTvcANn7ch9ajV1D3Thj3NPrF2FVNIdy5/gx8fXGTkHmYTEt4cBPzcE0XW82LZfVeYe96yYe7G87g9hdO4471PptdVudFDRuzvJ7Dg3MDSYPQuji5y+7gCDp6YzjSE8MPDN+HogLtZ5llF2l7KFas8zEdDO2s3nVhHJJEhDaLOvy/p8xlo9u/YCvobAltmgnr2+ZfxDzlbG9u7OwAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;image 1&apos; title=&apos;&apos; src=&apos;/static/af7906b3ca7d8be2e2dfde7b38b71096/c778f/image-1.png&apos; srcset=&apos;/static/af7906b3ca7d8be2e2dfde7b38b71096/e7570/image-1.png 170w,
+/static/af7906b3ca7d8be2e2dfde7b38b71096/f46e7/image-1.png 340w,
+/static/af7906b3ca7d8be2e2dfde7b38b71096/c778f/image-1.png 383w&apos; sizes=&apos;(max-width: 383px) 100vw, 383px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Activity 를 시작하면 학교 ID 로 학교 이메일을 받아온다&lt;/li&gt;
+&lt;li&gt;인증 번호 확인에 성공, 실패, 타임아웃 등 이벤트를 발생시킨다.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;UiState LiveData to StateFlow&lt;/h2&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;sealed&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;interface&lt;/span&gt; StudentVerificationUiState &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;token comment&quot;&gt;// 로딩 상태&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;object&lt;/span&gt; Loading &lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; StudentVerificationUiState
+
+		&lt;span class=&quot;token comment&quot;&gt;// 성공 상태&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;Success&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; schoolEmail&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; String&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; remainTime&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; Int&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; isValidateCode&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; Boolean &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; StudentVerificationUiState
+
+		&lt;span class=&quot;token comment&quot;&gt;// 에러 상태&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;object&lt;/span&gt; Error &lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; StudentVerificationUiState
+
+	&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;uiState 는 위와 같이 sealed interface 로 정의된다. 로딩, 성공, 실패 상태가 있으며 그에 따라 각각 다른 화면을 보여준다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;StudentsVerificationViewModel&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; schoolRepository&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; SchoolRepository&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+	  &lt;span class=&quot;token comment&quot;&gt;// ...&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;ViewModel&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+
+		&lt;span class=&quot;token comment&quot;&gt;// 로딩 상태로 초기화&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; _uiState &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MutableLiveData&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;Loading&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; uiState&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; LiveData&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; _uiState
+
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;loadSchoolEmail&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;schoolId&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; Int&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+				&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;
+        viewModelScope&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;launch&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            schoolRepository&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;loadSchoolEmail&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;schoolId&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+								&lt;span class=&quot;token comment&quot;&gt;// 성공하면 성공 상태로 set&lt;/span&gt;
+                &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onSuccess&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; email &lt;span class=&quot;token operator&quot;&gt;-&gt;&lt;/span&gt;
+                    _uiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;value &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; StudentVerificationUiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;Success&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;
+                        schoolEmail &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; email&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+                        remainTime &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MIN_REMAIN_TIME&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+								&lt;span class=&quot;token comment&quot;&gt;// 실패하면 에러 상태로 set&lt;/span&gt;
+                &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onFailure&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                    _uiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;value &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; StudentVerificationUiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;Error
+                    &lt;span class=&quot;token comment&quot;&gt;// ...&lt;/span&gt;
+                &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt; 
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;이때 ViewModel 의 loadSchoolEmail() 을 호출하면 repository 로 학교 이메일을 요청하고 결과에 따라UiState 를 업데이트한다.&lt;/p&gt;
+&lt;p&gt;이를 StateFlow 로 바꾸면?&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;StudentsVerificationViewModel&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; schoolRepository&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; SchoolRepository&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;//...&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;ViewModel&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;// 로딩 상태로 초기화 LiveData 와 달리 초기값이 필수다.&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; _uiState &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MutableStateFlow&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;Loading&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; uiState&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; StateFlow&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; _uiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;asStateFlow&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+	&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;ViewModel 에서 코드는 거의 비슷하다! StateFlow 는 초기 값을 필수로 지정해줘야 한다. 그것 말고는 별 다른게 없다.&lt;/p&gt;
+&lt;p&gt;Activity 에서는 다음과 같이 변경해야한다.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;observe 를 collect 로 변경한다.&lt;/li&gt;
+&lt;li&gt;Lifecycle 변경을 감지할 수 있도록 처리한다.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;lifecycleScope&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;launch&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;repeatOnLifecycle&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;Lifecycle&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;State&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;STARTED&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+						viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;uiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;collect&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; uiState &lt;span class=&quot;token operator&quot;&gt;-&gt;&lt;/span&gt;
+                &lt;span class=&quot;token function&quot;&gt;handleUiState&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;uiState&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;stateFlow 는 LiveData 와 달리 알아서 LifeCycle 을 감지하지 못한다.&lt;/p&gt;
+&lt;p&gt;홈 화면을 누르거나 다른 액티비티에 가리는 등 생명주기가 Stopped 상태일 때 계속해서 collect 하고 있지 않도록 repeatOnLifecycle 을 사용해 처리했다.&lt;/p&gt;
+&lt;p&gt;이 과정에서 ViewModel 테스트는 어떻게 되었을까?&lt;/p&gt;
+&lt;h3&gt;ViewModel Test with LiveData&lt;/h3&gt;
+&lt;p&gt;기존 LiveData 사용 시 테스트다. 테스트에 관한 자세한 얘기는 생략하겠다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token annotation builtin&quot;&gt;@get:Rule&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; instantExecutorRule &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;InstantTaskExecutorRule&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`이메일 불러오기에 실패하면 실패 상태가 된다`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;// given&lt;/span&gt;
+    &lt;span class=&quot;token function&quot;&gt;`이메일 요청 결과가 다음과 같을 때`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;Result&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;failure&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+    viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;loadSchoolEmail&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;schoolId&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// then : &lt;/span&gt;
+    &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;uiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;value&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isExactlyInstanceOf&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationUiState&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;Error&lt;span class=&quot;token operator&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;java&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;ViewModel 의 uiState 의 value 가져와 검증한다.&lt;/p&gt;
+&lt;p&gt;안드로이드 의존성을 갖는 LiveData 를 ViewModel 에서 사용하면 ViewModel 을 단위 테스트하기 위해 Rule을 추가해줘야 한다.&lt;/p&gt;
+&lt;h3&gt;ViewModel Test with StateFlow&lt;/h3&gt;
+&lt;p&gt;테스트를 짜다보면 리팩터링 할 때 기존 테스트코드에 빨간줄이 생기는 경험을 하게된다. 하지만 이 경우엔 없다!&lt;/p&gt;
+&lt;p&gt;value 로 뽑아서 가져오는 방식이 LiveData 와 똑같기 때문이다.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;더 이상 사용하지 않는 Rule 만 제거해주면 된다.&lt;/strong&gt;&lt;/p&gt;
+&lt;h2&gt;Event 처리 LiveData to SharedFlow&lt;/h2&gt;
+&lt;p&gt;Event Wrapping class 를 사용한 커스텀 SingleLiveData 를 사용하고 있었다.&lt;/p&gt;
+&lt;p&gt;그 이유는 다음 글로 확인하길 바란다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://festago.github.io/event-singlelivedata/&quot;&gt;https://festago.github.io/event-singlelivedata/&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; _event &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MutableSingleLiveData&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; event&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; SingleLiveData&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; _event
+
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;confirmVerificationCode&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    viewModelScope&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;launch&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// ...&lt;/span&gt;
+        studentVerificationRepository&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;requestVerificationCodeConfirm&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onSuccess&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                _event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;setValue&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;VerificationSuccess&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onFailure&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            _event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;setValue&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;VerificationFailure&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+         &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+     &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;발생시키고 싶은 Event 가 있다면 MutableSingleLiveData 의 value 를 set 하면 된다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; _event &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MutableSharedFlow&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; event&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; SharedFlow&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; _event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;asSharedFlow&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;confirmVerificationCode&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+		viewModelScope&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;launch&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;
+	      studentVerificationRepository&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;requestVerificationCodeConfirm&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+				&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onSuccess&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            _event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;VerificationSuccess&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+         &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;onFailure&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            _event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;VerificationFailure&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+         &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+     &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;하지만 sharedFlow 는 value 를 사용하지 않는다. 발생시키고 싶은 Event 가 있다면 emit 을 해주면 된다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;lifecycleScope&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;launch&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;repeatOnLifecycle&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;Lifecycle&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;State&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;STARTED&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;collect&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; event &lt;span class=&quot;token operator&quot;&gt;-&gt;&lt;/span&gt;
+                &lt;span class=&quot;token function&quot;&gt;handleEvent&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;event&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;event 도 마찬가지로 Lifecycle 에 맞춰 동작하기 위해 위와 같은 이유로 repeatOnLifecycle 을 적용했다.&lt;/p&gt;
+&lt;p&gt;여기까진 아무 문제가 없었다. 하지만 테스트에서 몇가지 문제가 발생했다.&lt;/p&gt;
+&lt;h3&gt;ViewModelTest with SharedFlow&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;문제점 1.  sharedFlow 는 getValue() 로 값을 얻어올 수 없다.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;sharedFlow 는 LiveData 혹은 StateFlow 와 다르게 value 를 가져올 수 없다.  그렇기 때문에 방출되는 값을 반환받을 방법이 필요했다.&lt;/p&gt;
+&lt;p&gt;해결 방법 : Flow 의 first() 확장함수 사용&lt;/p&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
+      &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/f0adc435f0c72d9a01c507f44dd7912d/89e0a/image-2.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
+    &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 37.64705882352941%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAICAYAAAD5nd/tAAAACXBIWXMAAAsTAAALEwEAmpwYAAABGklEQVR42o2QWW7DMAxEfR1tFLXZTp2kKfrT+19oOpacFElRoB8PQ9PiSJxJZ4XOlRTEljtalSokIlF1johFfqFVIDlQI4IGOOswZRrmtpIFSk3LRhbUVdFOGWlNfcAH/4w81y44OEfDjTd8vM3YWsLcGlYaVprXJFiK8rDC+XH7A/d3Pc3LitvnF07blUYzJEj/aQ/8PuD8GPwHU5SA27ag5AyRSBML69xQazrGDMb3uMi96L2ekjLDpAjMIniGTVMNFns/5UKYYyq91v1cDAOeFz4mML9Ald4LmM4M/HK5Yju/Y2WGKWUUMail9Ah2Sm2HVkSVzm4QdRhJZC9J18k703PSmPhCB8NVDZ9+X/OVEYU9VrTHuj+9b6tM9vjHcgXHAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;image 2&apos; title=&apos;&apos; src=&apos;/static/f0adc435f0c72d9a01c507f44dd7912d/ca1dc/image-2.png&apos; srcset=&apos;/static/f0adc435f0c72d9a01c507f44dd7912d/e7570/image-2.png 170w,
+/static/f0adc435f0c72d9a01c507f44dd7912d/f46e7/image-2.png 340w,
+/static/f0adc435f0c72d9a01c507f44dd7912d/ca1dc/image-2.png 680w,
+/static/f0adc435f0c72d9a01c507f44dd7912d/02d09/image-2.png 1020w,
+/static/f0adc435f0c72d9a01c507f44dd7912d/89e0a/image-2.png 1355w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;first 의 내부 구조를 보면 알 수 있듯  이 함수는 방출되는 가장 첫번째 값을 반환하며 일정 시간동안 방출되지 않으면 NoSuchElementException() 을 발생시킨다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`... 인증 번호 확인이 성공하면 인증 성공 이벤트가 발생한다`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; runTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// given&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// ...&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;confirmVerificationCode&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;vm&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;StudentVerificationEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;VerificationSuccess&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;flow 는 코루틴 위에서 동작한다. 따라서 suspend function 인 first() 를 사용하려면 runTest 를 사용해 TestScope 를 열어줘야 한다.&lt;/p&gt;
+&lt;p&gt;하지만 이것은 곧바로 다음 문제를 직면한다.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;문제점 2. sharedFlow 가 값을 방출할 때 까지 기다리지 않는다.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;이전의 코드는 처음으로 방출된 event 를 받아오지만 viewModel.confirmVerificationCode() 와 vm.event.first() 가 동기적으로 실행된다. 실제로 방출된 이후 값을 기다리게 되어 기다리기만 하다가 결국 예외가 발생한다.&lt;/p&gt;
+&lt;p&gt;값이 들어올 때 까지 기다리게 하기 위해서 async scope 를 열고 값이 반환된 후에 assertThat 검증이 실행되도록 변경하였다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`given ... 인증 번호 확인이 성공하면 인증 성공 이벤트가 발생한다`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;runTest&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;UnConfinedTestDispather&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// given&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// ...&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// sharedFlow Event 기다리기&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; deferredEvent &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; async &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            vm&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;confirmVerificationCode&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;deferredEvent&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;await&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;이렇게 하면 처음으로 방출되는 이벤트가 반환될 때까지 기다렸다가 검증하여 테스트가 정상적으로 작동한다.&lt;/p&gt;
+&lt;p&gt;이때 주의할 점은 테스트의 즉각적인 실행을 위해 UnConfinedTestDispatcher 를 사용해야 한다.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;UnConfinedTesDispatcher : 코루틴 빌더가 반환될 때까지 기다리지 않고 즉시 실행해 예상 가능한 결과를 테스트할 수 있다.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;테스트의 정상 작동은 확인했지만 그래도 아직 마음에 들지 않는다.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;문제점3. 테스트는 편리해야 한다.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;매번 deferred  type 으로 기다리게 하고 await 으로 값을 체크하는 것은 용납할 수 없는 불편함이다. 그러다 찾은 것이 바로 turbine 이다.&lt;/p&gt;
+&lt;p&gt;turbine 은 Flow Test third-party 라이브러리로 공식문서에서 편리한 Flow 테스트를 위해 사용해라고 소개되어있다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://developer.android.com/kotlin/flow/test&quot;&gt;https://developer.android.com/kotlin/flow/test&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/cashapp/turbine&quot;&gt;https://github.com/cashapp/turbine&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;이 turbine 라이브러리를 사용하면 turbine 스코프를 열 수 있는데 이를 사용하면 훨씬 간단하게 위의 테스트를 진행할 수 있다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`... 인증 번호 확인이 성공하면 인증 성공 이벤트가 발생한다`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; runTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// given&lt;/span&gt;
+        &lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;
+
+				&lt;span class=&quot;token operator&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;*&lt;/span&gt;vm&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;event&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;token comment&quot;&gt;// turbineScope**&lt;/span&gt;
+        
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+				viewModel&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;confirmVerificationCode&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;token operator&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;*&lt;/span&gt;            &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+            &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;awaitItem&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;token function&quot;&gt;cancelAndIgnoreRemainingEvents&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;test turbine 스코프 내에서 awaitItem() 을 사용할 때마다 방출되는 값을 받을 수 있고 cancelAndIgnoreRemainingEvents() 를 사용해  남은 이벤트를 받지 않고 코루틴 스코프를 cancel 할 수 있다.&lt;/p&gt;
+&lt;p&gt;아무 이벤트도 일어나지 않음을 테스트하려면 &lt;code class=&quot;language-text&quot;&gt;expectNoEvents() 를 사용하면 된다.&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&apos;gatsby-resp-image-wrapper&apos; style=&apos;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 680px; margin-bottom: 16px;&apos;&gt;
+      &lt;a class=&apos;gatsby-resp-image-link&apos; href=&apos;/static/168b249943126bfcfa718cfc01b1118e/f97d7/image-3.png&apos; style=&apos;display: block&apos; target=&apos;_blank&apos; rel=&apos;noopener&apos;&gt;
+    &lt;span class=&apos;gatsby-resp-image-background-image&apos; style=&quot;padding-bottom: 13.529411764705882%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAADCAYAAACTWi8uAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAo0lEQVR42i2O2wqDMBBE/f+Pa1FjYjS9mXsspdCHQq1Md0MfhpmdZdnTeB+QcoEldyTrHEJMtQshVkWaufchoKwr7SMu1xtKKTU755FSxrJYNKOe0A8SbS/QkQ7Hts5q1BDkYlB/lxikon4E3wipIacTOqFgzBl6mjEbgyYmpsn1O38pZUUmOs684z4TCfeWSDhX8vsL9vFBeb6x719s20a+4wd28dtE/TzKHAAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;&gt;&lt;/span&gt;
+  &lt;img class=&apos;gatsby-resp-image-image&apos; alt=&apos;image 3&apos; title=&apos;&apos; src=&apos;/static/168b249943126bfcfa718cfc01b1118e/ca1dc/image-3.png&apos; srcset=&apos;/static/168b249943126bfcfa718cfc01b1118e/e7570/image-3.png 170w,
+/static/168b249943126bfcfa718cfc01b1118e/f46e7/image-3.png 340w,
+/static/168b249943126bfcfa718cfc01b1118e/ca1dc/image-3.png 680w,
+/static/168b249943126bfcfa718cfc01b1118e/02d09/image-3.png 1020w,
+/static/168b249943126bfcfa718cfc01b1118e/9d567/image-3.png 1360w,
+/static/168b249943126bfcfa718cfc01b1118e/f97d7/image-3.png 2000w&apos; sizes=&apos;(max-width: 680px) 100vw, 680px&apos; style=&apos;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&apos; loading=&apos;lazy&apos; decoding=&apos;async&apos;&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;추가적으로 Turbine 은 UnconfinedTestDispatcher 에 의존하고 있다. 이는 테스트를 더 쉽게 만들지만 이를 인지하고 사용해야 한다.&lt;/p&gt;
+&lt;p&gt;다음은 학습을 위해 작성한 테스트 코드이다.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;kotlin&quot;&gt;&lt;pre class=&quot;language-kotlin&quot;&gt;&lt;code class=&quot;language-kotlin&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt; SharedFlowTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;token keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; _sharedFlow &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; MutableSharedFlow&lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;Int&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;replay &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; sharedFlow &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;asSharedFlow&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// 실패&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow in StandardTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; runTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// 실패&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@OptIn&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ExperimentalCoroutinesApi&lt;span class=&quot;token operator&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow in UnconfinedTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;runTest&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;UnconfinedTestDispatcher&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// 실패&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow with async in StandardTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; runTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; deferred &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; async &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;deferred&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;await&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// 성공&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@OptIn&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ExperimentalCoroutinesApi&lt;span class=&quot;token operator&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow with async in UnconfinedTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;runTest&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;UnconfinedTestDispatcher&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token keyword&quot;&gt;val&lt;/span&gt; deferred &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; async &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;first&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+        _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+        &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;deferred&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;await&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;token comment&quot;&gt;// 성공&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow with turbine in StandardTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; runTest &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+            _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+            &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;awaitItem&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+		&lt;span class=&quot;token comment&quot;&gt;// 성공&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@OptIn&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;ExperimentalCoroutinesApi&lt;span class=&quot;token operator&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;token keyword&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token annotation builtin&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;`test sharedFlow with turbine in UnconfinedTestDispatcher`&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;runTest&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;UnconfinedTestDispatcher&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token comment&quot;&gt;// when&lt;/span&gt;
+            _sharedFlow&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;emit&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;token comment&quot;&gt;// then&lt;/span&gt;
+            &lt;span class=&quot;token function&quot;&gt;assertThat&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;awaitItem&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;isEqualTo&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;이 결과를 확인하면 더 쉽게 이해할 수 있을 것이다.&lt;/p&gt;
+&lt;h2&gt;해당 PR 링크&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/woowacourse-teams/2023-festa-go/pull/429&quot;&gt;https://github.com/woowacourse-teams/2023-festa-go/pull/429&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;다른 화면 리팩터링&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/woowacourse-teams/2023-festa-go/pull/493&quot;&gt;https://github.com/woowacourse-teams/2023-festa-go/pull/493&lt;/a&gt;
+&lt;a href=&quot;https://github.com/woowacourse-teams/2023-festa-go/pull/494&quot;&gt;https://github.com/woowacourse-teams/2023-festa-go/pull/494&lt;/a&gt;
+&lt;a href=&quot;https://github.com/woowacourse-teams/2023-festa-go/pull/495&quot;&gt;https://github.com/woowacourse-teams/2023-festa-go/pull/495&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[LiveData로 이벤트 처리하기: SingleLiveData]]></title><description><![CDATA[…]]></description><link>https://festago.github.io/event-singlelivedata/</link><guid isPermaLink="false">https://festago.github.io/event-singlelivedata/</guid><pubDate>Tue, 19 Sep 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;안녕하세요. 페스타고의 해시입니다.&lt;/p&gt;
 &lt;p&gt;페스타고 앱을 개발하면서 다른 액티비티로 넘어가거나 토스트를 띄우는 등의 이벤트를 어떻게 처리할지를 고민하게 되었고, 이러한 이벤트를 처리하기 위해 시도했던 방법과 겪었던 문제점, 그리고 해결 방법에 대해 다루려 합니다.&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;먼저 어떤 상황에서 이벤트가 발생하는지 코드를 통해 살펴보자.&lt;/p&gt;
